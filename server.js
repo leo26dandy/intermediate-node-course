@@ -1,24 +1,64 @@
 const express= require('express');
 const mongoose= require('mongoose');
 const bodyParser= require('body-parser');
-const port=8000;
+const User = require('./models/User');
+const port= process.env.PORT || 8000;
 const app= express();
 
 app.use(bodyParser.json());
+
+mongoose.connect('mongodb://127.0.0.1:27017/userData', {useUnifiedTopology:true});
 
 app.listen(port, ()=>{
 	console.log(`server is listening on port:${port}`)
 })
 
 // CREATE
-app.post('/users',(req,res)=>{
+app.post('/users', (req,res)=>{
   // User.create()
+  User.create(
+    {
+      name: req.body.newData.name,
+      email: req.body.newData.email,
+      password: req.body.newData.password
+    },
+    (err, data) => {
+      if (err) {
+        res.json({success: false, message: err})
+      } else if (!data) {
+        res.json({success: false, message: "Not found!"})
+      } else {
+        res.json({success: true, data: data})
+      } 
+    })
 })
 
 app.route('/users/:id')
 // READ
 .get((req,res)=>{
   // User.findById()
+  User.findById( req.params.id, (err, data) => {
+    if (err) {
+      res.json(
+        {
+          success: "false",
+          message: err
+        }
+      )
+    }
+    else if (!data) {
+      res.json({
+        success: "false",
+        message: "Not found!"
+      })
+    }
+    else {
+      res.json({
+        success: "true",
+        data: data
+      })
+    }
+  })
 })
 // UPDATE
 .put((req,res)=>{
